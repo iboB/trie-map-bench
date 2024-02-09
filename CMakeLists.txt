@@ -1,10 +1,10 @@
 # Copyright (c) Borislav Stanimirov
 # SPDX-License-Identifier: MIT
 #
-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 
-project(my_app_template
-    LANGUAGES C CXX
+project(trie-map-bench
+    LANGUAGES CXX
 )
 
 # cpm
@@ -25,10 +25,6 @@ list(APPEND CMAKE_MODULE_PATH
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_C_STANDARD_REQUIRED ON)
 
 if(MSVC)
     # /Zc:preprocessor - incompatible with Windows.h
@@ -88,13 +84,13 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON) # solution folders
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) # all executables go to bin
 set(CMAKE_LINK_DEPENDS_NO_SHARED ON) # no file deps on linker
-enable_testing()
 
 ######################
 # packages
-CPMAddPackage(gh:iboB/splat@1.3.2)
+CPMAddPackage(gh:iboB/picobench@2.06)
 CPMAddPackage(gh:iboB/itlib@1.10.3)
 
 ######################
 # subdirs
-add_subdirectory(scratch)
+add_subdirectory(picobench-main)
+add_subdirectory(bench)
