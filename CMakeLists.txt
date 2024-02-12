@@ -90,6 +90,9 @@ set(CMAKE_LINK_DEPENDS_NO_SHARED ON) # no file deps on linker
 CPMAddPackage(gh:iboB/picobench@2.06)
 CPMAddPackage(gh:iboB/itlib@1.10.3)
 
+configure_file(repo_root.in.h repo_root.h @ONLY)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 ######################
 # subdirs
 add_subdirectory(picobench-main)
