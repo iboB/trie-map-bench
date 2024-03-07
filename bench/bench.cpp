@@ -101,7 +101,7 @@ static void find_stdlike_map(picobench::state& s) {
     std::minstd_rand rng(123);
 
     int sum = 0;
-    for (auto _ : s) {
+    for ([[maybe_unused]] auto _ : s) {
         auto i = rng() % s.iterations() + 10;
         std::string_view f = int(i) >= s.iterations() ? "bagavag" : w[i].c_str();
         auto it = m.find(f);
@@ -126,7 +126,7 @@ static void find_trie_map(picobench::state& s) {
     std::minstd_rand rng(123);
 
     int sum = 0;
-    for (auto _ : s) {
+    for ([[maybe_unused]] auto _ : s) {
         auto i = rng() % s.iterations() + 10;
         std::string_view f = int(i) >= s.iterations() ? "bagavag" : w[i].c_str();
         auto it = m.find(f);
