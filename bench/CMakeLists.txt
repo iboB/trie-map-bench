@@ -3,7 +3,7 @@ macro(add_benchmark name)
     add_executable(${tgt})
     set_target_properties(${tgt} PROPERTIES FOLDER bench)
     target_sources(${tgt} PRIVATE ${ARGN})
-    target_link_libraries(${tgt} picobench-main)
+    target_link_libraries(${tgt} picobench-main itlib)
     add_custom_target(
         run-${tgt}
         COMMAND ${tgt}

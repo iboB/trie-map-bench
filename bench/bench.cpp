@@ -10,6 +10,8 @@
 #include <fstream>
 #include <random>
 #include <unordered_map>
+#include <map>
+#include <itlib/flat_map.hpp>
 
 
 std::vector<std::string> strings = {
@@ -51,8 +53,9 @@ const auto w = read_words(REPO_ROOT "/txt/hf_ch1.txt");
 
 PICOBENCH_SUITE("insert");
 
-static void insert_unordered_map(picobench::state& s) {
-    std::unordered_map<std::string_view, int> m;
+template <template <typename...> class Map>
+static void insert_stdlike_map(picobench::state& s) {
+    Map<std::string_view, int> m;
     for (auto i : s) {
         m[w[i]] = i;
     }
@@ -63,7 +66,12 @@ static void insert_unordered_map(picobench::state& s) {
     }
     s.set_result(sum);
 }
+auto insert_unordered_map = insert_stdlike_map<std::unordered_map>;
+auto insert_flat_map = insert_stdlike_map<itlib::flat_map>;
+auto insert_std_map = insert_stdlike_map<std::map>;
 PICOBENCH(insert_unordered_map);
+PICOBENCH(insert_flat_map);
+PICOBENCH(insert_std_map);
 
 static void insert_trie_map(picobench::state& s) {
     trie_map m;
@@ -84,8 +92,9 @@ PICOBENCH(insert_trie_map);
 
 PICOBENCH_SUITE("find");
 
-static void find_unordered_map(picobench::state& s) {
-    std::unordered_map<std::string_view, int> m;
+template <template <typename...> class Map>
+static void find_stdlike_map(picobench::state& s) {
+    Map<std::string_view, int> m;
     for (int i = 0; i < s.iterations(); ++i) {
         m[w[i]] = i;
     }
@@ -94,7 +103,7 @@ static void find_unordered_map(picobench::state& s) {
     int sum = 0;
     for (auto _ : s) {
         auto i = rng() % s.iterations() + 10;
-        std::string_view f = i >= s.iterations() ? "bagavag" : w[i].c_str();
+        std::string_view f = int(i) >= s.iterations() ? "bagavag" : w[i].c_str();
         auto it = m.find(f);
         if (it != m.end()) {
             sum += it->second;
@@ -102,7 +111,12 @@ static void find_unordered_map(picobench::state& s) {
     }
     s.set_result(sum);
 }
+auto find_unordered_map = find_stdlike_map<std::unordered_map>;
+auto find_flat_map = find_stdlike_map<itlib::flat_map>;
+auto find_std_map = find_stdlike_map<std::map>;
 PICOBENCH(find_unordered_map);
+PICOBENCH(find_flat_map);
+PICOBENCH(find_std_map);
 
 static void find_trie_map(picobench::state& s) {
     trie_map m;
@@ -114,7 +128,7 @@ static void find_trie_map(picobench::state& s) {
     int sum = 0;
     for (auto _ : s) {
         auto i = rng() % s.iterations() + 10;
-        std::string_view f = i >= s.iterations() ? "bagavag" : w[i].c_str();
+        std::string_view f = int(i) >= s.iterations() ? "bagavag" : w[i].c_str();
         auto it = m.find(f);
         if (it) {
             sum += *it;
