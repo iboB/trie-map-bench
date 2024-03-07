@@ -87,7 +87,7 @@ set(CMAKE_LINK_DEPENDS_NO_SHARED ON) # no file deps on linker
 
 ######################
 # packages
-CPMAddPackage(gh:iboB/picobench@2.06)
+CPMAddPackage(gh:iboB/picobench@2.07)
 CPMAddPackage(gh:iboB/itlib@1.10.3)
 
 configure_file(repo_root.in.h repo_root.h @ONLY)

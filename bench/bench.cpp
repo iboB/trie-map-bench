@@ -7,9 +7,10 @@
 
 #include "repo_root.h"
 
-#include <vector>
-#include <cstdlib> // for rand
 #include <fstream>
+#include <random>
+#include <unordered_map>
+
 
 std::vector<std::string> strings = {
     "widow",
@@ -18,8 +19,7 @@ std::vector<std::string> strings = {
     "dead",
 };
 
-std::string read_file(const std::string& filename)
-{
+std::string read_file(const std::string& filename) {
     std::ifstream file(filename);
     std::string content;
     file.seekg(0, std::ios::end);
@@ -32,19 +32,15 @@ std::string read_file(const std::string& filename)
     return content;
 }
 
-std::vector<std::string> read_words(const std::string& filename)
-{
+std::vector<std::string> read_words(const std::string& filename) {
     auto content = read_file(filename);
     std::vector<std::string> words;
     auto* cur_word = &words.emplace_back();
-    for (char c : content)
-    {
-        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '\'')
-        {
+    for (char c : content)     {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '\'') {
             cur_word->push_back(c);
         }
-        else if (!cur_word->empty())
-        {
+        else if (!cur_word->empty()) {
             cur_word = &words.emplace_back();
         }
     }
@@ -53,24 +49,77 @@ std::vector<std::string> read_words(const std::string& filename)
 
 const auto w = read_words(REPO_ROOT "/txt/hf_ch1.txt");
 
-static void rand_vector(picobench::state& s)
-{
-    std::vector<int> v;
-    for (auto _ : s)
-    {
-        v.push_back(rand());
-    }
-}
-PICOBENCH(rand_vector); // Register the above function with picobench
+PICOBENCH_SUITE("insert");
 
-// Another benchmarking function:
-static void rand_vector_reserve(picobench::state& s)
-{
-    std::vector<int> v;
-    v.reserve(s.iterations());
-    for (auto _ : s)
-    {
-        v.push_back(rand());
+static void insert_unordered_map(picobench::state& s) {
+    std::unordered_map<std::string_view, int> m;
+    for (auto i : s) {
+        m[w[i]] = i;
     }
+
+    int sum = int(m.size());
+    for (auto [k, v] : m) {
+        sum += v;
+    }
+    s.set_result(sum);
 }
-PICOBENCH(rand_vector_reserve);
+PICOBENCH(insert_unordered_map);
+
+static void insert_trie_map(picobench::state& s) {
+    trie_map m;
+    for (auto i : s) {
+        m.insert(w[i], i);
+    }
+
+    int sum = 0;
+    for (auto& n : m.m_nodes) {
+        if (n->payload != -1) {
+            ++sum;
+            sum += n->payload;
+        }
+    }
+    s.set_result(sum);
+}
+PICOBENCH(insert_trie_map);
+
+PICOBENCH_SUITE("find");
+
+static void find_unordered_map(picobench::state& s) {
+    std::unordered_map<std::string_view, int> m;
+    for (int i = 0; i < s.iterations(); ++i) {
+        m[w[i]] = i;
+    }
+    std::minstd_rand rng(123);
+
+    int sum = 0;
+    for (auto _ : s) {
+        auto i = rng() % s.iterations() + 10;
+        std::string_view f = i >= s.iterations() ? "bagavag" : w[i].c_str();
+        auto it = m.find(f);
+        if (it != m.end()) {
+            sum += it->second;
+        }
+    }
+    s.set_result(sum);
+}
+PICOBENCH(find_unordered_map);
+
+static void find_trie_map(picobench::state& s) {
+    trie_map m;
+    for (int i = 0; i < s.iterations(); ++i) {
+        m.insert(w[i], i);
+    }
+    std::minstd_rand rng(123);
+
+    int sum = 0;
+    for (auto _ : s) {
+        auto i = rng() % s.iterations() + 10;
+        std::string_view f = i >= s.iterations() ? "bagavag" : w[i].c_str();
+        auto it = m.find(f);
+        if (it) {
+            sum += *it;
+        }
+    }
+    s.set_result(sum);
+}
+PICOBENCH(find_trie_map);
