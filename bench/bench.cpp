@@ -13,6 +13,9 @@
 #include <map>
 #include <itlib/flat_map.hpp>
 
+#include <intrin.h>
+#include <hash_table8.hpp>
+
 
 std::vector<std::string> strings = {
     "widow",
@@ -114,9 +117,11 @@ static void find_stdlike_map(picobench::state& s) {
 auto find_unordered_map = find_stdlike_map<std::unordered_map>;
 auto find_flat_map = find_stdlike_map<itlib::flat_map>;
 auto find_std_map = find_stdlike_map<std::map>;
+auto find_emhash = find_stdlike_map<emhash8::HashMap>;
 PICOBENCH(find_unordered_map);
 PICOBENCH(find_flat_map);
 PICOBENCH(find_std_map);
+PICOBENCH(find_emhash);
 
 static void find_trie_map(picobench::state& s) {
     trie_map m;
@@ -137,3 +142,4 @@ static void find_trie_map(picobench::state& s) {
     s.set_result(sum);
 }
 PICOBENCH(find_trie_map);
+

@@ -85,10 +85,23 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON) # solution folders
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) # all executables go to bin
 set(CMAKE_LINK_DEPENDS_NO_SHARED ON) # no file deps on linker
 
+if(MSVC)
+    add_compile_options(/arch:AVX)
+endif()
+
 ######################
 # packages
 CPMAddPackage(gh:iboB/picobench@2.07)
 CPMAddPackage(gh:iboB/itlib@1.10.3)
+CPMAddPackage(
+    NAME emhash
+    VERSION 1.0.0
+    GIT_REPOSITORY https://github.com/ktprime/emhash.git
+    GIT_TAG fb5ca7e044324d3e1fb0e5d80fef11bb1d657797
+    DOWNLOAD_ONLY YES
+)
+add_library(emhash INTERFACE)
+target_include_directories(emhash INTERFACE ${emhash_SOURCE_DIR})
 
 configure_file(repo_root.in.h repo_root.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
